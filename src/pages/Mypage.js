@@ -11,23 +11,22 @@ import { eyeList } from "../components/signup/FaceResource";
 import myReview from "../img/myReview.svg";
 import mailOpen from "../img/mailOpen.svg";
 import AlertModal from "../components/mypageEdit/AlertModal";
-import BottomNavi from '../components/BottomNavi';
-import {loggedInDB} from '../redux/modules/userSlice'
+import BottomNavi from "../components/BottomNavi";
+import { loggedInDB } from "../redux/modules/userSlice";
 
 const Mypage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [modal, setModal] = useState(false);
-  const [alertModal, setAlertModal] = useState(false)
-  const [alertModalType, setAlertModalType] = useState("")
+  const [alertModal, setAlertModal] = useState(false);
+  const [alertModalType, setAlertModalType] = useState("");
   const { userInfo } = useSelector((state) => state.loggedIn);
   let notiCount = localStorage.getItem("newNoti");
 
-  useEffect(()=>{   
-    console.log('다시 안그려?') 
-    dispatch(loggedInDB())
-  },[userInfo, dispatch])
-
+  useEffect(() => {
+    console.log("다시 안그려?");
+    dispatch(loggedInDB());
+  }, [userInfo, dispatch]);
 
   const notiModalOpen = () => {
     setModal(true);
@@ -35,21 +34,21 @@ const Mypage = () => {
   };
 
   const userEye = (eye) => {
-    return eyeList.filter((row) => row.includes(`${userInfo.eyes}.`) && row);
+    // return eyeList.filter((row) => row.includes(`${userInfo.eyes}.`) && row);
   };
-console.log(userInfo)
-  
-  const alertModalOpen = (boolean, type = null) =>{
-    setAlertModalType(type)
-    setAlertModal(boolean)    
-  }
+  console.log(userInfo);
 
-  
+  const alertModalOpen = (boolean, type = null) => {
+    setAlertModalType(type);
+    setAlertModal(boolean);
+  };
 
   return (
     <>
       <MypageWrap>
-        {alertModal && <AlertModal type={alertModalType} alertModalOpen={alertModalOpen}/>}
+        {alertModal && (
+          <AlertModal type={alertModalType} alertModalOpen={alertModalOpen} />
+        )}
         <MypageHeader>
           <Navi>
             <NoticeModal modal={modal} setModal={setModal} />
@@ -86,7 +85,7 @@ console.log(userInfo)
             </div>
             <ReviewBox>
               <ul>
-                <li onClick={() => navigate('/mypage_edit/myreview')}>
+                <li onClick={() => navigate("/mypage_edit/myreview")}>
                   <img src={myReview} alt="내가 쓴 리뷰 확인" />
                   나의 리뷰관리
                 </li>
@@ -102,7 +101,9 @@ console.log(userInfo)
           <ul>
             <li>
               <span>{userInfo.customerId}</span>
-              <span onClick={() => alertModalOpen(true, "logout")}>로그아웃</span>
+              <span onClick={() => alertModalOpen(true, "logout")}>
+                로그아웃
+              </span>
             </li>
             <li onClick={() => navigate("/mypage_edit/change_password")}>
               <span>비밀번호 변경</span>
@@ -117,17 +118,24 @@ console.log(userInfo)
             <li onClick={() => alertModalOpen(true, "none")}>
               <span>FAQ</span>
             </li>
-            <li onClick={() => window.location.href="https://docs.google.com/forms/d/e/1FAIpQLSeOzr5Ppeu0BGJIuxBldO7LoFd_VUOeL0ZGzDk0SkP8jBZl8Q/viewform"}>
-              <span>의견보내기🎁</span> 
+            <li
+              onClick={() =>
+                (window.location.href =
+                  "https://docs.google.com/forms/d/e/1FAIpQLSeOzr5Ppeu0BGJIuxBldO7LoFd_VUOeL0ZGzDk0SkP8jBZl8Q/viewform")
+              }
+            >
+              <span>의견보내기🎁</span>
             </li>
             <li>
-              <span>개인정보처리 방침</span> <span onClick={() => alertModalOpen(true, "secession")}>회원탈퇴</span>
+              <span>개인정보처리 방침</span>{" "}
+              <span onClick={() => alertModalOpen(true, "secession")}>
+                회원탈퇴
+              </span>
             </li>
           </ul>
         </ManuWrap>
       </MypageWrap>
       <BottomNavi />
-      
     </>
   );
 };
@@ -201,7 +209,7 @@ const ProfileSection = styled.div`
           line-height: 14px;
           color: var(--INFO);
           border-radius: 500px;
-          cursor:pointer;
+          cursor: pointer;
         }
       }
       div.mail {
@@ -224,14 +232,14 @@ const ReviewBox = styled.div`
   background-color: #fff;
   border-radius: 20px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  
+
   ul {
     display: flex;
     height: 100%;
 
     li {
-      display: flex;     
-      cursor:pointer; 
+      display: flex;
+      cursor: pointer;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -240,7 +248,7 @@ const ReviewBox = styled.div`
       line-height: 160%;
       width: 50%;
       height: 100%;
-      
+
       :first-child {
         border-right: 1px solid #f5f5f5;
       }
@@ -264,11 +272,12 @@ const ManuWrap = styled.div`
       font-weight: 300;
       font-size: 16px;
       line-height: 160%;
-      a {////////
+      a {
+        ////////
         padding-left: 20px; //////
-        text-decoration:none;
-        color:black;
-      }////////////
+        text-decoration: none;
+        color: black;
+      } ////////////
       span {
         padding-left: 20px;
       }

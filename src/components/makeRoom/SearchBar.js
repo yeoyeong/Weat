@@ -9,7 +9,12 @@ import check from "../../img/icon/check.png";
 import { ReactComponent as Face } from "../../img/characterface.svg";
 import { ReactComponent as Search } from "../../img/search.svg";
 
-import { friendDB, addFriends } from "../../redux/modules/roomMakingSlice";
+import {
+  friendDB,
+  addFriends,
+  searchUser,
+  searchResultReset,
+} from "../../redux/modules/roomMakingSlice";
 import { eyeList } from "../../components/signup/FaceResource";
 import { roomInviteDB } from "../../redux/modules/postSlice";
 import { VioletRoundTextBtn } from "../../css/Style";
@@ -18,22 +23,12 @@ import { device } from "../../css/GlobalStyles";
 const SearchBar = (props) => {
   const dispatch = useDispatch();
   const { searchResults } = useSelector((state) => state.roomMaking);
+  const { searchDefaultValue } = useSelector((state) => state.roomMaking);
+
   const me = useSelector((state) => state.loggedIn.userInfo);
   const [searchInput, setSearchInput] = useState("");
   const [checkedInputs, setCheckedInputs] = useState([]);
   const guestId = checkedInputs.map((data) => data.split(",")[0]);
-
-  /////소켓
-  const inviteMember = () => {
-    console.log(me.userId, guestId, props.id);
-    props.socket?.emit("inviteMember", {
-      userId: me.userId,
-      guestName: guestId,
-      roomId: props.id,
-    });
-  };
-
-  ////////
 
   //검색 키워드
   const onChangeInputValue = (e) => {
@@ -47,12 +42,13 @@ const SearchBar = (props) => {
 
   //검색결과 불러오기
   const userSearching = useCallback(() => {
-    dispatch(friendDB(searchInput));
+    console.log(searchInput);
+    dispatch(searchUser(searchInput));
   }, [searchInput, dispatch]);
 
   //검색된 목록의 눈
   const userEye = (eye) => {
-    return eyeList.filter((row) => row.includes(eye) && row);
+    return eyeList.filter((row) => row[eye])[0][eye];
   };
 
   //초대 대상 선택
@@ -69,25 +65,27 @@ const SearchBar = (props) => {
     }
   };
   const Inviting = async () => {
-    const userId = checkedInputs.map((data) => data.split(",")[0]);
-    const user_data = checkedInputs.map((data) => data.split(","));
-    // console.log(userId)
+    const checkedUser = searchDefaultValue.filter((user) =>
+      checkedInputs.includes(user.userId)
+    );
+    dispatch(addFriends(checkedUser));
 
-    if (!props.id) {
-      await dispatch(addFriends(checkedInputs));
-      await inviteMember();
-      props.setSerchBar(false);
-    } else {
-      await dispatch(roomInviteDB(props.id, { guestId: userId }, user_data));
-      await inviteMember();
-      props.setSerchBar(false);
-    }
+    // checkedInputs.map((el)=>{
+    //   searchResults,
+    //   searchDefaultValue
+    // })
+    // if (!props.id) {
+    //   await dispatch(addFriends(checkedInputs));
+    //   props.setSerchBar(false);
+    // } else {
+    //   await dispatch(roomInviteDB(props.id, { guestId: userId }, user_data));
+    //   props.setSerchBar(false);
+    // }
   };
 
   const checked = (userId) => {
-    checkedInputs.map((a) => {
-      return a.includes(userId);
-    });
+    if (checkedInputs.includes(userId)) return true;
+    return false;
   };
 
   const handleKeyDown = (e) => {
@@ -95,8 +93,10 @@ const SearchBar = (props) => {
       userSearching();
     }
   };
-
-
+  const SearchCancelHandler = () => {
+    dispatch(searchResultReset());
+    setSearchInput("");
+  };
   return (
     <SearchWrap serchBarPosition={props.serchBar}>
       <section className="header">
@@ -109,12 +109,17 @@ const SearchBar = (props) => {
             <input
               type="text"
               placeholder="유저 검색 가능"
+              value={searchInput}
               onChange={onChangeInputValue}
               onKeyDown={handleKeyDown}
             />
-            <button onClick={userSearching} >
-              <Search fill="black" />
-            </button>
+            {searchResults ? (
+              <button onClick={SearchCancelHandler}>X</button>
+            ) : (
+              <button onClick={userSearching}>
+                <Search fill="black" />
+              </button>
+            )}
           </label>
         </SerchBar>
         <UserListWrap>
@@ -132,12 +137,7 @@ const SearchBar = (props) => {
                           <p>{u.nickname}</p>
                         </div>
                         <CheckBox
-                          value={[
-                            u.userId,
-                            userEye(u.eyes),
-                            u.faceColor,
-                            u.nickname,
-                          ]}
+                          value={u.userId}
                           type="checkBox"
                           onChange={userSelector}
                           checked={checked(u.userId)}
@@ -148,7 +148,29 @@ const SearchBar = (props) => {
                     </li>
                   );
                 })
-              : null}
+              : searchDefaultValue.map((u, idx) => {
+                  return (
+                    <li key={u.userId}>
+                      <UserFace eyes={userEye(u.eyes)}>
+                        <UserFaceItem fill={u.faceColor} />
+                      </UserFace>
+                      <label htmlFor={u.userId}>
+                        <div>
+                          <p>{u.name}</p>
+                          <p>{u.nickname}</p>
+                        </div>
+                        <CheckBox
+                          value={u.userId}
+                          type="checkBox"
+                          onChange={userSelector}
+                          checked={checked(u.userId)}
+                          check={check}
+                          id={u.userId}
+                        />
+                      </label>
+                    </li>
+                  );
+                })}
           </ul>
         </UserListWrap>
       </section>
@@ -166,10 +188,10 @@ const SearchBar = (props) => {
 };
 
 const SearchWrap = styled.aside`
-@media ${device.pc} {
+  @media ${device.pc} {
     right: ${(props) => (props.serchBarPosition ? "30.5%" : "-10%")};
-    transform: translate(50%,0);
-    box-shadow:none;
+    transform: translate(50%, 0);
+    box-shadow: none;
     opacity: ${(props) => (props.serchBarPosition ? "1" : "0")};
   }
   position: fixed;
@@ -247,41 +269,39 @@ const UserListWrap = styled.div`
   ul {
     padding-bottom: 230px;
     li {
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    padding: 12px 0;
-    border-bottom: 1px solid #dedede;
-    :first-child {
-      padding-top: 0;
-    }
-    label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 10px;
-      div {
-        p {
-          :first-child {
-            font-family: "AppleSDGothicNeoB";
-            font-size: 14px;
-            line-height: 160%;
-            color: var(--DARKEST);
-          }
-          :last-child {
-            font-family: "AppleSDGothicNeoT";
-            font-weight: 600;
-            font-size: 12px;
-            line-height: 14px;
-            color: var(--DEFAULT);
-            padding-top: 4px;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      padding: 12px 0;
+      border-bottom: 1px solid #dedede;
+      :first-child {
+        padding-top: 0;
+      }
+      label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+        div {
+          p {
+            :first-child {
+              font-family: "AppleSDGothicNeoB";
+              font-size: 14px;
+              line-height: 160%;
+              color: var(--DARKEST);
+            }
+            :last-child {
+              font-family: "AppleSDGothicNeoT";
+              font-weight: 600;
+              font-size: 12px;
+              line-height: 14px;
+              color: var(--DEFAULT);
+              padding-top: 4px;
+            }
           }
         }
       }
     }
   }
-  }
-
-  
 `;
 
 const UserFace = styled.div`

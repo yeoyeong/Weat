@@ -12,8 +12,12 @@ const Members = (props) => {
   const serchBarOpen = useCallback(() => {
     props.setSerchBar(true);
   }, []);
+  // const userEye = (eye) => {
+  //   return eyeList.filter((row) => row.includes(eye) && row);
+  // };
   const userEye = (eye) => {
-    return eyeList.filter((row) => row.includes(eye) && row);
+    return eyeList.filter((row) => row[eye])[0][eye];
+    // return eyeList.filter((row) => row.includes(eye) && row);
   };
   return (
     <MembersWrap>
@@ -40,7 +44,15 @@ const Members = (props) => {
                 </UserFace>
                 <p>나</p>
               </Member>
-              {tasteRoom.invitedFriends.map((f, idx) => {
+              {tasteRoom.invitedFriends.map((user, idx) => (
+                <Member key={user.uaerId}>
+                  <UserFace eye={userEye(user.eyes)}>
+                    <Face fill={user.faceColor} />
+                  </UserFace>
+                  <p>{user.nickname}</p>
+                </Member>
+              ))}
+              {/* {tasteRoom.invitedFriends.map((f, idx) => {
                 const friend = f.split(",");
                 return (
                   <Member key={friend[0]}>
@@ -50,7 +62,7 @@ const Members = (props) => {
                     <p>{friend[3]}</p>
                   </Member>
                 );
-              })}
+              })} */}
             </ul>
           </li>
         </Invite>

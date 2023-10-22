@@ -1,4 +1,3 @@
-
 import Type0 from "../../img/eyes/type0.svg";
 import Type2 from "../../img/eyes/type2.svg";
 import Type3 from "../../img/eyes/type3.svg";
@@ -12,17 +11,20 @@ import Type10 from "../../img/eyes/type10.svg";
 import Type11 from "../../img/eyes/type11.svg";
 
 export const eyeList = [
-  Type0,
-  Type2,
-  Type3,
-  Type4,
-  Type5,
-  Type6,
-  Type7,
-  Type8,
-  Type9,
-  Type10,
-  Type11,
+  { type0: Type0 },
+  { type2: Type2 },
+  { type3: Type4 },
+  { type4: Type5 },
+  // Type2,
+  // Type3,
+  // Type4,
+  // Type5,
+  // Type6,
+  // Type7,
+  // Type8,
+  // Type9,
+  // Type10,
+  // Type11,
 ];
 
 export const colorTest = [
