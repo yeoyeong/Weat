@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { Container } from "../css/Style";
-import { loadRoomDetailDB, findRoomCode,} from "../redux/modules/postSlice";
+import { loadRoomDetailDB, findRoomCode } from "../redux/modules/postSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 import house from "../img/house.svg";
@@ -15,7 +15,7 @@ import SearchBar from "../components/makeRoom/SearchBar";
 import Header from "../components/Header";
 import { addNotiList } from "../redux/modules/socketSlice";
 import Splash from "../components/Splash";
-import { modalNum } from '../redux/modules/mapSlice';
+import { modalNum } from "../redux/modules/mapSlice";
 
 const Detail = (props) => {
   const dispatch = useDispatch();
@@ -28,32 +28,38 @@ const Detail = (props) => {
   const inviteUser = useSelector((state) => state.post.inviteUser);
   const myId = useSelector((state) => state.loggedIn.userInfo.userId);
   const [isLoading, setIsLoading] = useState(false);
-  const modalRD = useSelector(state => state.map.modalNum); // 모달리덕스라는 뜻
+  const modalRD = useSelector((state) => state.map.modalNum); // 모달리덕스라는 뜻
 
   //실시간 맛집 추가 알림
   let guestId = users && users.guestInfo.map((user) => user.userId); // 게스트아이디
   let ownerId = users && users.owner.ownerId; //오너 아이디
   let allMembers = users && [...guestId, ownerId]; //모든 룸멤버
   let roomId = id; // 룸아이디
-//   const [roomMembers, setRoomMembers] = useState(users && allMembers.filter((id) => id !== myId))
+  //   const [roomMembers, setRoomMembers] = useState(users && allMembers.filter((id) => id !== myId))
   let roomMembers = users && allMembers.filter((id) => id !== myId); // 나를뺀 룸멤버
- 
 
   const newStoreNoti = () => {
     props.socket?.emit("TheStore", {
       roomId: roomId,
       userId: myId,
       memberId: roomMembers,
-      storeName:'테스트맛집1'
+      storeName: "테스트맛집1",
     });
-    console.log('룸아이디',roomId,'내아이디',myId,'멤버아이디',roomMembers)
-    addNotiList()
-  }
+    console.log(
+      "룸아이디",
+      roomId,
+      "내아이디",
+      myId,
+      "멤버아이디",
+      roomMembers
+    );
+    addNotiList();
+  };
 
   const SearchModal = async () => {
-    await dispatch(modalNum(modalRD?false:true))
-    navigate('/map')
-}
+    await dispatch(modalNum(modalRD ? false : true));
+    navigate("/map");
+  };
 
   useEffect(() => {
     const detail_load = async () => {
@@ -61,12 +67,12 @@ const Detail = (props) => {
       await dispatch(loadRoomDetailDB(id));
       // dispatch(detailId(id));
       await dispatch(findRoomCode(id));
-      
+
       await setIsLoading(false);
     };
     detail_load();
   }, []);
-  
+
   return (
     <div>
       {isLoading ? <Splash /> : ""}
@@ -82,7 +88,10 @@ const Detail = (props) => {
           />
         )}
         {isloaded && <RestaurantList status={detail?.status} id={id} />}
-        <RestaurantAdd onClick={SearchModal}><img src={house} alt="집아이콘"/>맛집 추가</RestaurantAdd>
+        <RestaurantAdd onClick={SearchModal}>
+          <img src={house} alt="집아이콘" />
+          맛집 추가
+        </RestaurantAdd>
         <SearchBar
           id={id}
           serchBar={serchBar}
@@ -98,7 +107,7 @@ export default Detail;
 
 const NewContainer = styled(Container)`
   font-family: "AppleSDGothicNeoM00", sans-serif;
-  height:100vh;
+  height: 100vh;
   background-color: ${({ status }) =>
     status === "publicOwner"
       ? "#FF7337"
